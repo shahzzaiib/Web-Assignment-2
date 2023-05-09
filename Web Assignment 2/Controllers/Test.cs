@@ -1,93 +1,76 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace PaintballProject.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class PaintballPlayersController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PlayersController : ControllerBase
+    private readonly List<Player> _players;
+
+    public PaintballPlayersController()
     {
-        private readonly PaintballDbContext _dbContext;
-
-        public PlayersController(PaintballDbContext dbContext)
+        // Initialize the list of players with some dummy data
+        _players = new List<Player>
         {
-            _dbContext = dbContext;
-        }
+            new Player { Id = 1, Name = "Alice", Age = 25, Gender = "Female", SkillLevel = "Intermediate" },
+            new Player { Id = 2, Name = "Bob", Age = 30, Gender = "Male", SkillLevel = "Expert" },
+            new Player { Id = 3, Name = "Charlie", Age = 20, Gender = "Male", SkillLevel = "Beginner" }
+        };
+    }
 
-        // GET api/players
-        [HttpGet]
-        public ActionResult<IEnumerable<Player>> Get()
+    // GET: api/PaintballPlayers
+    [HttpGet]
+    public IEnumerable<Player> Get()
+    {
+        return _players;
+    }
+
+    // GET: api/PaintballPlayers/5
+    [HttpGet("{id}", Name = "Get")]
+    public ActionResult<Player> Get(int id)
+    {
+        var player = _players.FirstOrDefault(p => p.Id == id);
+        if (player == null)
         {
-            var players = _dbContext.Players.ToList();
-
-            return Ok(players);
+            return NotFound();
         }
+        return player;
+    }
 
-        // GET api/players/5
-        [HttpGet("{id}")]
-        public ActionResult<Player> Get(int id)
+    // POST: api/PaintballPlayers
+    [HttpPost]
+    public void Post([FromBody] Player player)
+    {
+        _players.Add(player);
+    }
+
+    // PUT: api/PaintballPlayers/5
+    [HttpPut("{id}")]
+    public ActionResult Put(int id, [FromBody] Player player)
+    {
+        var existingPlayer = _players.FirstOrDefault(p => p.Id == id);
+        if (existingPlayer == null)
         {
-            var player = _dbContext.Players.FirstOrDefault(p => p.Id == id);
-
-            if (player == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(player);
+            return NotFound();
         }
+        existingPlayer.Name = player.Name;
+        existingPlayer.Age = player.Age;
+        existingPlayer.Gender = player.Gender;
+        existingPlayer.SkillLevel = player.SkillLevel;
+        return NoContent();
+    }
 
-        public PaintballDbContext Get_dbContext()
+    // DELETE: api/PaintballPlayers/5
+    [HttpDelete("{id}")]
+    public ActionResult Delete(int id)
+    {
+        var player = _players.FirstOrDefault(p => p.Id == id);
+        if (player == null)
         {
-            return _dbContext;
+            return NotFound();
         }
-
-        // POST api/players
-        [HttpPost]
-        public ActionResult<Player> Post([FromBody] Player player, PaintballDbContext _dbContext)
-        {
-            object value = _dbContext.Players.Add(player);
-            _dbContext.SaveChanges();
-
-            return CreatedAtAction(nameof(Get), new { id = player.Id }, player);
-        }
-
-        // PUT api/players/5
-        [HttpPut("{id}")]
-        public ActionResult<Player> Put(int id, [FromBody] Player player)
-        {
-            var existingPlayer = _dbContext.Players.FirstOrDefault(p => p.Id == id);
-
-            if (existingPlayer == null)
-            {
-                return NotFound();
-            }
-
-            existingPlayer.Name = player.Name;
-            existingPlayer.Age = player.Age;
-
-            _dbContext.SaveChanges();
-
-            return Ok(existingPlayer);
-        }
-
-        // DELETE api/players/5
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
-        {
-            var playerToRemove = _dbContext.Players.FirstOrDefault(p => p.Id == id);
-
-            if (playerToRemove == null)
-            {
-                return NotFound();
-            }
-
-            _dbContext.Players.Remove(playerToRemove);
-            _dbContext.SaveChanges();
-
-            return NoContent();
-        }
+        _players.Remove(player);
+        return NoContent();
     }
 }

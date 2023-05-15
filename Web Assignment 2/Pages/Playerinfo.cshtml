@@ -1,0 +1,66 @@
+﻿@page "/players"
+
+@inject HttpClient httpClient
+
+<h3>Player List</h3>
+
+@if (players != null)
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Skill Level</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var player in players)
+            {
+                <tr>
+                    <td>@player.Name</td>
+                    <td>@player.Age</td>
+                    <td>@player.Gender</td>
+                    <td>@player.SkillLevel</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading player data...</p>
+}
+
+@code {
+    private List<Player>
+    players;
+
+    protected override async Task OnInitializedAsync()
+    {
+    players = await httpClient.GetFromJsonAsync<List<Player>>("api/players");
+    }
+}
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Skill Level</th>
+        </tr>
+    </thead>
+    <tbody>
+                    @foreach (var player in Model.Players)
+                    {
+                <tr>
+                    <td>@player.Name</td>
+                    <td>@player.Age</td>
+                    <td>@player.Gender</td>
+                    <td>@player.SkillLevel</td>
+                </tr>
+                    }
+    </tbody>
+</table>
